@@ -130,7 +130,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 2
+  serializedVersion: 3
   m_GIWorkflowMode: 1
   m_EnableBakedLightmaps: 1
   m_EnableRealtimeLightmaps: 0
@@ -169,7 +169,7 @@ LightingSettings:
   m_PVREnvironmentReferencePointCount: 2048
   m_LightProbeSampleCountMultiplier: 4
   m_PVRBounces: 2
-  m_PVRRussianRouletteStartBounce: 2
+  m_PVRMinBounces: 1
   m_PVREnvironmentMIS: 0
   m_PVRFilteringMode: 2
   m_PVRDenoiserTypeDirect: 0
@@ -433,12 +433,8 @@ MonoBehaviour:
   player: {fileID: 963194228}
   ChunkPrefab: {fileID: 116871302423814890, guid: 9934723e450ecde4297f43bac29dfa75,
     type: 3}
-  PlayerLocation:
-    x: 0
-    y: 0
-    z: 0
-  RenderRange: 10
-  UnloadRange: 20
+  RenderRange: 32
+  UnloadRange: 64
 --- !u!4 &1402639836
 Transform:
   m_ObjectHideFlags: 0

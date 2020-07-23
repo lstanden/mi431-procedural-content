@@ -27,13 +27,17 @@ public class Chunk : MonoBehaviour
     /// <returns></returns>
     IEnumerator GenerateMesh()
     {
-        var job    = new TerrainGenJob(ChunkId);
+        var job = new TerrainGenJob(ChunkId,
+            VoxelData.Instance.DirectionChecks,
+            VoxelData.Instance.VoxelVerts,
+            VoxelData.Instance.VoxelTris,
+            VoxelData.Instance.VoxelUvs);
         var handle = job.Schedule();
 
         // This magic allows us to not block frame rendering while the job runs
         while (!handle.IsCompleted)
             yield return null;
-        
+
         handle.Complete();
 
         // Each mesh needs to be unique

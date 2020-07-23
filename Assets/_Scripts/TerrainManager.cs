@@ -19,7 +19,7 @@ public class TerrainManager : MonoBehaviour
     /// <summary>
     /// Controls at what range new chunks should be loaded and rendered to the world
     /// </summary>
-    public int RenderRange = 10;
+    public int RenderRange = 16;
 
     /// <summary>
     /// Controls at what range chunks should be removed from the world because the player is too far away from them
@@ -31,6 +31,7 @@ public class TerrainManager : MonoBehaviour
 
     private void Start()
     {
+        VoxelData.Initialize();
         StartCoroutine(LoadChunksIfNecessary());
         StartCoroutine(UnloadChunksIfNecessary());
     }
@@ -105,7 +106,8 @@ public class TerrainManager : MonoBehaviour
         var y     = (position.z + 0.1f) * scale;
 
         var groundnoise = (noise.srnoise(new float2(position.x, position.z) * .01f) + 1) / 2;
-        var groundlevel = (int) Mathf.Lerp(128, 200, groundnoise);
+        
+        var groundlevel = (int) math.lerp(128, 200, groundnoise);
 
         if (position.y > groundlevel)
             return TileType.AIR;
