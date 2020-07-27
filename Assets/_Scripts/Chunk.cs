@@ -11,6 +11,7 @@ using UnityEngine.Rendering;
 public class Chunk : MonoBehaviour
 {
     public int2 ChunkId;
+    public NativeHashMap<ushort, RuntimeBlockData> BlockData;
     private MeshFilter meshFilter;
 
     void Start()
@@ -30,8 +31,8 @@ public class Chunk : MonoBehaviour
         var job = new TerrainGenJob(ChunkId,
             VoxelData.Instance.DirectionChecks,
             VoxelData.Instance.VoxelVerts,
-            VoxelData.Instance.VoxelTris,
-            VoxelData.Instance.VoxelUvs);
+            BlockData,
+            VoxelData.Instance.VoxelTris);
         var handle = job.Schedule();
 
         // This magic allows us to not block frame rendering while the job runs

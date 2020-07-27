@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public class TerrainManager : MonoBehaviour
 {
+    /// <summary>
+    /// Used to define the blocks that can be generated
+    /// </summary>
+    public BlockDefinitions BlockDefinitions;
+
     /// <summary>
     /// Used to track the player location so chunks can be spawned around them
     /// </summary>
@@ -28,10 +34,12 @@ public class TerrainManager : MonoBehaviour
 
     private Dictionary<int2, GameObject> LoadedChunks = new Dictionary<int2, GameObject>();
     private float3 PlayerLocation;
+    private static readonly int MainTexture = Shader.PropertyToID("_MainTexture");
 
     private void Start()
     {
         VoxelData.Initialize();
+        BlockDefinitions.GenerateBlocks();
         StartCoroutine(LoadChunksIfNecessary());
         StartCoroutine(UnloadChunksIfNecessary());
     }
@@ -54,9 +62,10 @@ public class TerrainManager : MonoBehaviour
                 var cid = new int2(playerChunk.x - x, playerChunk.y - z);
                 if (LoadedChunks.ContainsKey(cid)) continue;
 
-                var go    = Instantiate(ChunkPrefab, transform);
+                var go = Instantiate(ChunkPrefab, transform);
                 var chunk = go.GetComponent<Chunk>();
                 chunk.ChunkId = cid;
+                chunk.BlockData = BlockDefinitions.Blocks;
 
                 LoadedChunks.Add(cid, go);
             }
@@ -101,16 +110,26 @@ public class TerrainManager : MonoBehaviour
         // Top of the world
         if (position.y > 255) return TileType.AIR;
 
-        var scale = 0.01f;
-        var x     = (position.x + 0.1f) * scale;
-        var y     = (position.z + 0.1f) * scale;
+        var pos = new float2(position.x, position.z);
+        var groundnoise = noise.snoise(pos * .005f) * noise.snoise(pos * .001f);
+        var groundlevel = (int)math.remap(0, 1, 100, 200, groundnoise);
 
-        var groundnoise = (noise.srnoise(new float2(position.x, position.z) * .01f) + 1) / 2;
-        
-        var groundlevel = (int) math.lerp(128, 200, groundnoise);
+        var dirtlevel = (int) math.remap(-1f, 1f, 1f, 5f,
+            noise.snoise(new float2(position.x + .1f, position.z + .1f) * .01f));
 
         if (position.y > groundlevel)
             return TileType.AIR;
-        return TileType.DIRT;
+
+        var cave = noise.snoise(position * .0035f) > .7f;
+        if (cave)
+            return TileType.AIR;
+
+        if (position.y == groundlevel)
+            return TileType.GRASS;
+
+        if (position.y >= groundlevel - dirtlevel)
+            return TileType.DIRT;
+
+        return TileType.STONE;
     }
 }

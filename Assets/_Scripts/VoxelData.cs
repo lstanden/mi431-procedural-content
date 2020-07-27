@@ -96,12 +96,4 @@ public class VoxelData
         },
         Allocator.Persistent);
 
-    /// <summary>
-    /// UVs are basically static, but we list them out here just to avoid duplication
-    /// </summary>
-    public readonly NativeArray<float2> VoxelUvs = new NativeArray<float2>(new[]
-        {
-            new float2(0.0f, 0.0f), new float2(0.0f, 1.0f), new float2(1.0f, 0.0f), new float2(1.0f, 1.0f)
-        },
-        Allocator.Persistent);
 }

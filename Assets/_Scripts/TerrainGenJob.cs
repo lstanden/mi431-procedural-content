@@ -11,30 +11,25 @@ struct TerrainGenJob : IJob, IDisposable
 {
     private struct VertData
     {
-        public VertData(float3 position, float2 uv)
+        public VertData(float3 position, float3 uv)
         {
             Position = position;
             UV = uv;
         }
 
         public float3 Position;
-        public float2 UV;
+        public float3 UV;
     }
 
-    [ReadOnly]
-    public int2 ChunkId;
+    [ReadOnly] public int2 ChunkId;
 
-    [ReadOnly]
-    public NativeArray<int3> DirectionChecks;
+    [ReadOnly] public NativeArray<int3> DirectionChecks;
 
-    [ReadOnly]
-    public NativeArray<float3> VoxelVerts;
+    [ReadOnly] public NativeArray<float3> VoxelVerts;
 
-    [ReadOnly]
-    public NativeArray<int> VoxelTris;
+    [ReadOnly] public NativeArray<int> VoxelTris;
 
-    [ReadOnly]
-    public NativeArray<float2> VoxelUvs;
+    [ReadOnly] public NativeHashMap<ushort, RuntimeBlockData> BlockData;
 
     public Mesh.MeshDataArray meshData;
     private NativeList<VertData> vertData;
@@ -44,20 +39,20 @@ struct TerrainGenJob : IJob, IDisposable
     public TerrainGenJob(int2 _chunkId,
         NativeArray<int3> directionChecks,
         NativeArray<float3> voxelVerts,
-        NativeArray<int> voxelTris,
-        NativeArray<float2> voxelUvs)
+        NativeHashMap<ushort, RuntimeBlockData> blockData,
+        NativeArray<int> voxelTris)
     {
         ChunkId = _chunkId;
 
         meshData = Mesh.AllocateWritableMeshData(1);
 
-        vertData = new NativeList<VertData>(Allocator.TempJob);
-        Triangles = new NativeList<int>(Allocator.TempJob);
+        vertData = new NativeList<VertData>(Allocator.Persistent);
+        Triangles = new NativeList<int>(Allocator.Persistent);
 
         DirectionChecks = directionChecks;
         VoxelVerts = voxelVerts;
         VoxelTris = voxelTris;
-        VoxelUvs = voxelUvs;
+        BlockData = blockData;
 
         VertexOffset = 0;
     }
@@ -86,13 +81,14 @@ struct TerrainGenJob : IJob, IDisposable
     {
         var array = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp);
         array[0] = new VertexAttributeDescriptor(VertexAttribute.Position);
-        array[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
+        array[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 3);
         return array;
     }
 
     void ProcessBlock(int3 position)
     {
         var block = TerrainManager.TileForPosition(WorldFromBlock(position));
+        var blockDef = BlockData[(ushort) block];
 
         // Skip air blocks, we don't need to render anything
         if (block == TileType.AIR) return;
@@ -103,7 +99,7 @@ struct TerrainGenJob : IJob, IDisposable
             if (TerrainManager.TileForPosition(WorldFromBlock(position) + dir) != TileType.AIR)
                 continue;
 
-            DrawQuad(position, i);
+            DrawQuad(position, i, blockDef);
         }
     }
 
@@ -112,13 +108,15 @@ struct TerrainGenJob : IJob, IDisposable
         return blockPosition + new int3(ChunkId.x * VoxelData.ChunkWidth, 0, ChunkId.y * VoxelData.ChunkWidth);
     }
 
-    void DrawQuad(int3 position, int offset)
+    void DrawQuad(int3 position, int offset, RuntimeBlockData blockDef)
     {
+        var texNum = blockDef[offset];
+
         var trisOffset = offset * 4;
-        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset]], VoxelUvs[0]));
-        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 1]], VoxelUvs[1]));
-        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 2]], VoxelUvs[2]));
-        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 3]], VoxelUvs[3]));
+        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset]], new float3(0, 0, texNum)));
+        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 1]], new float3(0, 1, texNum)));
+        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 2]], new float3(1, 0, texNum)));
+        vertData.Add(new VertData(position + VoxelVerts[VoxelTris[trisOffset + 3]], new float3(1, 1, texNum)));
 
         Triangles.Add(VertexOffset);
         Triangles.Add(VertexOffset + 1);

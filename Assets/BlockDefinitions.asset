@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8caa0d5f78834d43b06d45d7d34ff75d, type: 3}
+  m_Name: BlockDefinitions
+  m_EditorClassIdentifier: 
+  DefinedBlocks:
+  - BlockId: 0
+    Name: Air
+    Solid: 0
+    TextureTop: 0
+    TextureSide: 0
+    TextureBottom: 0
+  - BlockId: 1
+    Name: Dirt
+    Solid: 1
+    TextureTop: 0
+    TextureSide: 0
+    TextureBottom: 0
+  - BlockId: 2
+    Name: Grass
+    Solid: 1
+    TextureTop: 1
+    TextureSide: 2
+    TextureBottom: 0
+  - BlockId: 3
+    Name: Stone
+    Solid: 1
+    TextureTop: 3
+    TextureSide: 3
+    TextureBottom: 3

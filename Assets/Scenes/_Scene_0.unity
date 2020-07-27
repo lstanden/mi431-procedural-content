@@ -430,11 +430,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1730cb773f13a73499f01092961b6fd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BlockDefinitions: {fileID: 11400000, guid: d4ad96770c9dba24680f7cc1c32a58d8, type: 2}
   player: {fileID: 963194228}
   ChunkPrefab: {fileID: 116871302423814890, guid: 9934723e450ecde4297f43bac29dfa75,
     type: 3}
-  RenderRange: 32
-  UnloadRange: 64
+  RenderRange: 10
+  UnloadRange: 20
 --- !u!4 &1402639836
 Transform:
   m_ObjectHideFlags: 0
